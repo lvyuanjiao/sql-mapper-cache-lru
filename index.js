@@ -1,7 +1,7 @@
 'use strict';
 
 var util = require('./util');
-var cacheProvider = require('./cache-provider');
+var buildCacheProvider = require('./cache-provider');
 
 /*
   var opts = {
@@ -12,29 +12,30 @@ var cacheProvider = require('./cache-provider');
   }
 */
 module.exports = function(opts) {
-  var getCacheProvider = cacheProvider(opts);
+  var cacheProvider = buildCacheProvider(opts);
+
+  function getCacheProvider(plugin) {
+    return cacheProvider(plugin.params[0] || plugin.ctx.namespace);
+  }
+
+  function getCacheKey(plugin, params) {
+    return util.getCacheKey(plugin.ctx.dialect, plugin.ctx.database, plugin.queryName, params);
+  }
   return {
     cache: {
       onQuery: function(params, plugin, done) {
-        var ctx = plugin.ctx;
-        var checksum = ctx.checksum = util.getCacheKey(ctx.dialect, ctx.database, ctx.queryName, params);
-        var cacheName = plugin.params[0] || ctx.namespace;
-        done(getCacheProvider(cacheName).get(checksum));
+        var cacheKey = plugin.ctx.cacheKey = getCacheKey(plugin, params);
+        done(getCacheProvider(plugin).get(cacheKey));
       },
       afterMapping: function(results, plugin, done) {
-        var ctx = plugin.ctx;
-        var cacheName = plugin.params[0] || ctx.namespace;
-        getCacheProvider(cacheName).set(ctx.checksum, results);
+        getCacheProvider(plugin).set(plugin.ctx.cacheKey, results);
         done(results);
       }
     },
     flush: {
       onQuery: function(params, plugin, done) {
-        var ctx = plugin.ctx;
-        var checksum = util.getCacheKey(ctx.dialect, ctx.database, ctx.queryName, params);
-        var cacheName = plugin.params[0] || ctx.namespace;
-        getCacheProvider(cacheName).del(checksum);
-        done(params);
+        getCacheProvider(plugin).del(getCacheKey(plugin, params));
+        done();
       }
     }
   };

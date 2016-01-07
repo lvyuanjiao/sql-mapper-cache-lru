@@ -12,7 +12,7 @@ exports.checksum = function(s) {
 
 // http://stackoverflow.com/questions/5467129/sort-javascript-object-by-key
 exports.sortJSON = function(unordered) {
-  if (typeof unordered !== 'object' || Array.isArray(unordered)) {
+  if (typeof unordered !== 'object') {
     return;
   }
   Object.keys(unordered).sort().forEach(function(key) {
@@ -25,5 +25,5 @@ exports.sortJSON = function(unordered) {
 
 exports.getCacheKey = function(dialect, database, queryname, json) {
   exports.sortJSON(json);
-  return 'cache-' + exports.checksum(dialect + database + queryname + json);
+  return 'cache-' + exports.checksum(dialect + database + queryname + JSON.stringify(json));
 };
