@@ -1,7 +1,7 @@
 {
   "name": "sql-mapper-cache-lru",
   "description": "LRU cache plugin for sql-mapper",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "author": "lvyuanjiao <lvyuanjiao@yeah.net>",
   "contributors": [{
     "name": "Lv yuanjiao",
@@ -30,7 +30,7 @@
     "test": "node test/index.js"
   },
   "dependencies": {
-    "lru-cache": "~4.0.0"
+    "lru-cache": "^4.0.0"
   },
   "readmeFilename": "README.md",
   "license": "MIT"
